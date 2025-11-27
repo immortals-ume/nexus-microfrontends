@@ -1,22 +1,72 @@
 #!/bin/bash
 
-echo "Starting all microfrontend apps..."
+set -e
+set -o pipefail
 
-# Start dashboard
-(cd nexus-dashboard && npm run dev) &
-DASH_PID=$!
+echo "🚀 Building and starting ALL Microfrontends..."
 
-# Start admin
-(cd nexus-admin && npm run dev) &
-ADMIN_PID=$!
+# Resolve root directory: /nexus-composite/nexus-ui
+ROOT_DIR="$(cd "$(dirname "$0")"/.. && pwd)"
+echo "📁 Root Directory: $ROOT_DIR"
 
-# Start analytics
-(cd nexus-analytics && npm run dev) &
-ANALYTICS_PID=$!
+echo ""
+echo "============================="
+echo "🔍 Auto-detecting Microfrontends..."
+echo "============================="
 
-# Start host
-(cd host && npm run dev) &
-HOST_PID=$!
+# Find all folders that have a package.json (excluding scripts folder itself)
+apps=($(find "$ROOT_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "scripts" -exec test -f "{}/package.json" \; -print))
 
-# Wait for all
-wait $DASH_PID $ADMIN_PID $ANALYTICS_PID $HOST_PID
+if [ ${#apps[@]} -eq 0 ]; then
+  echo "❌ No microfrontend apps found!"
+  exit 1
+fi
+
+echo "📦 Detected Apps:"
+for app in "${apps[@]}"; do
+  echo "   ➤ $app"
+done
+
+echo ""
+echo "============================="
+echo "📦 Installing + Building ALL"
+echo "============================="
+
+for app in "${apps[@]}"; do
+  echo ""
+  echo "----------------------------------"
+  echo "📦 Processing: $app"
+  echo "----------------------------------"
+
+  (
+    cd "$app"
+
+    echo "📥 Installing dependencies..."
+    npm install --silent
+
+    echo "🏗️ Running build..."
+    npm run build || echo "⚠️ Build warning for $app (continuing...)"
+  )
+done
+
+echo ""
+echo "=================================="
+echo "🔥 Starting ALL dev servers..."
+echo "=================================="
+
+for app in "${apps[@]}"; do
+  echo ""
+  echo "👉 Starting $app..."
+  (
+    cd "$app"
+    npm run dev
+  ) &
+done
+
+echo ""
+echo "🎉 ALL MICROFRONTENDS STARTED!"
+echo "----------------------------------"
+echo "⚡ HOST: http://localhost:5172/"
+echo "----------------------------------"
+
+wait

@@ -1,4 +1,5 @@
-import React, { Component, ComponentType, ReactNode } from 'react';
+import { Component } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 /**
  * Error boundary state

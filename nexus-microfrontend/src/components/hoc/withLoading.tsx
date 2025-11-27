@@ -1,5 +1,5 @@
-import React, { ComponentType } from 'react';
-import { Spinner } from '../ui/Spinner';
+import type { ComponentType } from 'react';
+import Spinner from '../ui/Spinner';
 
 /**
  * Higher-Order Component that shows a loading state while data is being fetched

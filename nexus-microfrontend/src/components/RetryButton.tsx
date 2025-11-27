@@ -18,7 +18,7 @@ import Spinner from './ui/Spinner'
 interface RetryButtonProps {
   onRetry: () => Promise<void> | void
   children?: React.ReactNode
-  variant?: 'default' | 'outline' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   className?: string
   disabled?: boolean
@@ -28,7 +28,7 @@ interface RetryButtonProps {
 export const RetryButton = ({
   onRetry,
   children = 'Retry',
-  variant = 'default',
+  variant = 'primary',
   size = 'md',
   className,
   disabled = false,

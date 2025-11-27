@@ -11,7 +11,8 @@
  * - Type-safe with TypeScript
  */
 
-import React, { ReactNode } from 'react';
+import { Fragment, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 /**
@@ -72,7 +73,7 @@ export function DataTable<T extends { id: string | number }>({
           {data.map((item, index) => {
             // Custom row rendering
             if (renderRow) {
-              return <React.Fragment key={item.id}>{renderRow(item, index)}</React.Fragment>;
+              return <Fragment key={item.id}>{renderRow(item, index)}</Fragment>;
             }
 
             // Default row rendering
@@ -352,7 +353,7 @@ interface ToggleProps {
 }
 
 export function Toggle({ defaultValue = false, children }: ToggleProps) {
-  const [isOn, setIsOn] = React.useState(defaultValue);
+  const [isOn, setIsOn] = useState(defaultValue);
 
   const toggle = () => setIsOn((prev) => !prev);
   const setOn = () => setIsOn(true);

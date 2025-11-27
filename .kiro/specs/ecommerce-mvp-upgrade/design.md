@@ -118,17 +118,350 @@ The design emphasizes performance, scalability, type safety, and developer exper
 - React Query (TanStack Query) 5.x for server state
 - Axios 1.x for HTTP requests
 
-**Styling:**
-- Tailwind CSS 3.x for utility-first styling
-- HeadlessUI for accessible components
-- Framer Motion for animations
+**UI Framework & Component Libraries:**
+- **Shadcn/ui** - Beautifully designed, accessible components built with Radix UI
+- **Radix UI** - Unstyled, accessible component primitives
+- **Tailwind CSS 3.x** - Utility-first CSS framework
+- **Framer Motion** - Production-ready animation library
+- **Lucide React** - Beautiful, consistent icon library
+- **Recharts** - Composable charting library for analytics
+- **React Table (TanStack Table)** - Headless UI for building powerful tables
+- **Embla Carousel** - Lightweight carousel library for image galleries
+
+**Form & Validation:**
+- React Hook Form 7.x for performant form management
+- Zod for schema validation and type safety
+- @hookform/resolvers for React Hook Form + Zod integration
 
 **Additional Libraries:**
 - React Router 7.x for routing
-- React Hook Form for form management
-- Zod for schema validation
 - date-fns for date manipulation
-- react-hot-toast for notifications
+- clsx + tailwind-merge for conditional class names
+- react-hot-toast / Sonner for toast notifications
+- vaul for drawer components
+- cmdk for command palette
+
+### UI Framework Architecture
+
+The application uses a layered component architecture combining multiple UI frameworks:
+
+**Layer 1: Primitive Components (Radix UI)**
+- Provides unstyled, accessible primitives
+- Handles complex accessibility patterns (ARIA, keyboard navigation, focus management)
+- Components: Dialog, Dropdown Menu, Popover, Tabs, Accordion, Select, Checkbox, Radio Group, Slider, Switch, Toast, Tooltip, etc.
+
+**Layer 2: Styled Components (Shadcn/ui)**
+- Pre-styled components built on Radix UI primitives
+- Customizable through Tailwind CSS
+- Copy-paste approach - components live in your codebase
+- Full control over styling and behavior
+- Components include: Button, Card, Input, Label, Select, Dialog, Sheet, Dropdown Menu, Command, Table, Form, Badge, Avatar, Skeleton, etc.
+
+**Layer 3: Composite Components (Custom)**
+- Business-specific components built from Shadcn/ui
+- Product-specific patterns (ProductCard, CartItem, CheckoutWizard)
+- Feature-specific compositions (SearchBar with Command, FilterSidebar with Accordion)
+
+**Layer 4: Page Components**
+- Full page layouts combining all layers
+- Route-level components
+- Microfrontend entry points
+
+**Design System Integration:**
+
+```typescript
+// Shadcn/ui Configuration
+// components.json
+{
+  "style": "default",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "src/styles/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  }
+}
+
+// Tailwind CSS Variables for Theming
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 48%;
+}
+```
+
+**Component Patterns:**
+
+1. **Container/Presenter Pattern**
+```typescript
+// Container (Smart Component)
+export function ProductListContainer() {
+  const { data, isLoading } = useProducts();
+  const addToCart = useCartStore((state) => state.addItem);
+  
+  return (
+    <ProductListPresenter 
+      products={data} 
+      isLoading={isLoading}
+      onAddToCart={addToCart}
+    />
+  );
+}
+
+// Presenter (Dumb Component)
+export function ProductListPresenter({ products, isLoading, onAddToCart }) {
+  if (isLoading) return <ProductGridSkeleton />;
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {products.map(product => (
+        <ProductCard 
+          key={product.id} 
+          product={product}
+          onAddToCart={onAddToCart}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+2. **Compound Components Pattern**
+```typescript
+// Accordion compound component from Radix/Shadcn
+<Accordion type="single" collapsible>
+  <AccordionItem value="item-1">
+    <AccordionTrigger>Filter by Category</AccordionTrigger>
+    <AccordionContent>
+      <CategoryFilter />
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="item-2">
+    <AccordionTrigger>Filter by Price</AccordionTrigger>
+    <AccordionContent>
+      <PriceRangeFilter />
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+3. **Render Props Pattern**
+```typescript
+// Table with render props
+<DataTable
+  data={products}
+  columns={columns}
+  renderRow={(product) => (
+    <TableRow key={product.id}>
+      <TableCell>{product.name}</TableCell>
+      <TableCell>{product.price}</TableCell>
+      <TableCell>
+        <Button onClick={() => handleEdit(product)}>Edit</Button>
+      </TableCell>
+    </TableRow>
+  )}
+/>
+```
+
+4. **Higher-Order Components (HOCs)**
+```typescript
+// withAuth HOC
+export function withAuth<P extends object>(
+  Component: React.ComponentType<P>
+) {
+  return function AuthenticatedComponent(props: P) {
+    const { isAuthenticated } = useAuthStore();
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+      if (!isAuthenticated) {
+        navigate('/login');
+      }
+    }, [isAuthenticated, navigate]);
+    
+    if (!isAuthenticated) return null;
+    
+    return <Component {...props} />;
+  };
+}
+
+// Usage
+export const ProtectedDashboard = withAuth(Dashboard);
+```
+
+5. **Provider Pattern**
+```typescript
+// Theme Provider
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      <div className={theme}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
+}
+```
+
+6. **Factory Pattern**
+```typescript
+// Component Factory
+export function createFormField(type: 'input' | 'select' | 'textarea') {
+  const components = {
+    input: Input,
+    select: Select,
+    textarea: Textarea,
+  };
+  
+  return function FormField({ name, label, ...props }) {
+    const Component = components[type];
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={name}>{label}</Label>
+        <Component id={name} name={name} {...props} />
+      </div>
+    );
+  };
+}
+
+const InputField = createFormField('input');
+const SelectField = createFormField('select');
+```
+
+7. **State Reducer Pattern**
+```typescript
+// Complex form state with reducer
+type FormAction = 
+  | { type: 'SET_FIELD'; field: string; value: any }
+  | { type: 'SET_ERROR'; field: string; error: string }
+  | { type: 'RESET' };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return {
+        ...state,
+        values: { ...state.values, [action.field]: action.value },
+      };
+    case 'SET_ERROR':
+      return {
+        ...state,
+        errors: { ...state.errors, [action.field]: action.error },
+      };
+    case 'RESET':
+      return initialState;
+    default:
+      return state;
+  }
+}
+
+export function useFormState() {
+  const [state, dispatch] = useReducer(formReducer, initialState);
+  return { state, dispatch };
+}
+```
+
+8. **Command Pattern (Undo/Redo)**
+```typescript
+// Command pattern for cart operations
+interface Command {
+  execute(): void;
+  undo(): void;
+}
+
+class AddToCartCommand implements Command {
+  constructor(
+    private cartStore: CartStore,
+    private product: Product,
+    private quantity: number
+  ) {}
+  
+  execute() {
+    this.cartStore.addItem(this.product, this.quantity);
+  }
+  
+  undo() {
+    this.cartStore.removeItem(this.product.id);
+  }
+}
+
+// Command Manager
+class CommandManager {
+  private history: Command[] = [];
+  private currentIndex = -1;
+  
+  execute(command: Command) {
+    command.execute();
+    this.history = this.history.slice(0, this.currentIndex + 1);
+    this.history.push(command);
+    this.currentIndex++;
+  }
+  
+  undo() {
+    if (this.currentIndex >= 0) {
+      this.history[this.currentIndex].undo();
+      this.currentIndex--;
+    }
+  }
+  
+  redo() {
+    if (this.currentIndex < this.history.length - 1) {
+      this.currentIndex++;
+      this.history[this.currentIndex].execute();
+    }
+  }
+}
+```
 
 ## Components and Interfaces
 
@@ -279,48 +612,103 @@ The analytics microfrontend provides business intelligence:
 - `RecentTransactions`: Live transaction feed
 - `AlertsPanel`: Anomaly detection alerts
 
-### Shared Component Library
+### Shared Component Library (Shadcn/ui + Custom)
 
-Components shared across all microfrontends:
+Components shared across all microfrontends, organized by category:
 
-**UI Components:**
-- `Button`: Primary, secondary, outline, ghost variants
-- `Input`: Text, email, password, number inputs
-- `Select`: Dropdown select component
-- `Checkbox`: Checkbox with label
-- `Radio`: Radio button group
-- `Switch`: Toggle switch
-- `Textarea`: Multi-line text input
-- `Badge`: Status and count badges
-- `Avatar`: User avatar with fallback
-- `Card`: Container card component
-- `Tabs`: Tabbed interface component
-- `Accordion`: Collapsible content sections
-- `Tooltip`: Hover tooltip
-- `Popover`: Click popover menu
-- `Dropdown`: Dropdown menu
-- `Pagination`: Page navigation
-- `Table`: Data table with sorting
-- `Skeleton`: Loading skeleton placeholders
-- `Spinner`: Loading spinner
-- `Progress`: Progress bar
-- `Alert`: Alert messages
+**Core UI Components (Shadcn/ui):**
+- `Button`: Multiple variants (default, destructive, outline, secondary, ghost, link) with size options
+- `Input`: Styled text inputs with focus states and error handling
+- `Label`: Accessible form labels
+- `Select`: Dropdown select with search and multi-select support
+- `Checkbox`: Accessible checkbox with indeterminate state
+- `RadioGroup`: Radio button group with proper ARIA
+- `Switch`: Toggle switch component
+- `Textarea`: Multi-line text input with auto-resize
+- `Slider`: Range slider for price filters
+- `Badge`: Status badges with variants (default, secondary, destructive, outline)
+- `Avatar`: User avatar with fallback and status indicator
+- `Card`: Container with header, content, footer sections
+- `Separator`: Visual divider component
+- `Skeleton`: Loading skeleton with animation
+
+**Navigation Components (Shadcn/ui):**
+- `NavigationMenu`: Accessible navigation with dropdowns
 - `Breadcrumb`: Navigation breadcrumbs
-- `Divider`: Visual separator
+- `Tabs`: Tabbed interface with keyboard navigation
+- `Pagination`: Page navigation with ellipsis
 
-**Form Components:**
-- `FormField`: Form field wrapper with label and error
-- `FormError`: Error message display
-- `FormLabel`: Form label component
-- `FormHelperText`: Helper text for inputs
-- `ValidationMessage`: Validation feedback
+**Overlay Components (Shadcn/ui):**
+- `Dialog`: Modal dialog with backdrop
+- `Sheet`: Slide-out drawer (for cart, filters)
+- `Popover`: Floating popover menu
+- `DropdownMenu`: Context menu with submenus
+- `Tooltip`: Hover tooltip with delay
+- `HoverCard`: Rich hover card with content
+- `AlertDialog`: Confirmation dialog
+- `Command`: Command palette (⌘K) for search
 
-**Layout Components:**
-- `Container`: Max-width container
+**Feedback Components (Shadcn/ui):**
+- `Alert`: Alert messages with variants
+- `Toast` / `Sonner`: Toast notifications
+- `Progress`: Progress bar and circular progress
+- `Spinner`: Loading spinner
+
+**Data Display Components (Shadcn/ui + TanStack Table):**
+- `Table`: Data table with sorting, filtering, pagination
+- `DataTable`: Advanced table with column visibility, row selection
+- `Accordion`: Collapsible content sections
+- `Collapsible`: Simple collapsible component
+- `AspectRatio`: Maintain aspect ratio for images
+
+**Form Components (Shadcn/ui + React Hook Form):**
+- `Form`: Form wrapper with React Hook Form integration
+- `FormField`: Field wrapper with label, input, error
+- `FormItem`: Form item container
+- `FormLabel`: Accessible form label
+- `FormControl`: Form control wrapper
+- `FormDescription`: Helper text for inputs
+- `FormMessage`: Validation error message
+- `Calendar`: Date picker calendar
+- `DatePicker`: Date input with calendar popup
+- `Combobox`: Searchable select dropdown
+
+**Layout Components (Custom):**
+- `Container`: Max-width container with responsive padding
 - `Grid`: Responsive grid layout
-- `Flex`: Flexbox layout
-- `Stack`: Vertical/horizontal stack
+- `Flex`: Flexbox layout utility
+- `Stack`: Vertical/horizontal stack with gap
 - `Spacer`: Spacing component
+- `ScrollArea`: Custom scrollbar area
+
+**E-commerce Specific Components (Custom):**
+- `ProductCard`: Product display card with image, price, rating
+- `ProductGrid`: Responsive product grid with skeleton loading
+- `ProductImageGallery`: Image carousel with thumbnails (Embla Carousel)
+- `PriceDisplay`: Formatted price with currency
+- `RatingStars`: Star rating display and input
+- `QuantitySelector`: Quantity input with +/- buttons
+- `CartItemCard`: Cart item with image, details, quantity controls
+- `OrderStatusBadge`: Order status with color coding
+- `SearchBar`: Search input with Command integration
+- `FilterPanel`: Filter sidebar with Accordion
+- `SortDropdown`: Sort options dropdown
+
+**Chart Components (Recharts):**
+- `LineChart`: Line chart for trends
+- `BarChart`: Bar chart for comparisons
+- `PieChart`: Pie chart for distributions
+- `AreaChart`: Area chart for cumulative data
+- `ComposedChart`: Combined chart types
+
+**Utility Components:**
+- `ErrorBoundary`: Error boundary with fallback UI
+- `LoadingFallback`: Loading state component
+- `EmptyState`: Empty state with illustration and CTA
+- `ConfirmDialog`: Reusable confirmation dialog
+- `ImageUpload`: Image upload with preview
+- `CopyButton`: Copy to clipboard button
+- `ThemeToggle`: Light/dark mode toggle
 
 ### Shared Store Architecture (Zustand)
 
@@ -1243,6 +1631,570 @@ interface PaginatedResponse<T> {
 }
 ```
 
+## UI/UX Design System
+
+### Design Principles
+
+The e-commerce platform follows these core design principles:
+
+1. **Modern & Premium**: Clean, spacious layouts with subtle shadows and smooth animations
+2. **Delightful Interactions**: Micro-interactions that provide feedback and create joy
+3. **Accessible**: WCAG 2.1 AA compliant with proper contrast, focus states, and keyboard navigation
+4. **Performant**: Optimized animations using CSS transforms and GPU acceleration
+5. **Responsive**: Mobile-first approach with fluid layouts across all devices
+
+### Color System
+
+```typescript
+// Tailwind CSS Color Palette
+const colors = {
+  // Primary Brand Colors
+  primary: {
+    50: '#eef2ff',
+    100: '#e0e7ff',
+    200: '#c7d2fe',
+    300: '#a5b4fc',
+    400: '#818cf8',
+    500: '#6366f1',  // Main primary
+    600: '#4f46e5',  // Primary hover
+    700: '#4338ca',
+    800: '#3730a3',
+    900: '#312e81',
+  },
+  
+  // Secondary Colors
+  secondary: {
+    500: '#a855f7',  // Purple
+    600: '#9333ea',
+  },
+  
+  // Accent Colors
+  accent: {
+    500: '#ec4899',  // Pink
+    600: '#db2777',
+  },
+  
+  // Semantic Colors
+  success: {
+    50: '#f0fdf4',
+    500: '#10b981',  // Emerald
+    600: '#059669',
+  },
+  
+  warning: {
+    50: '#fffbeb',
+    500: '#f59e0b',  // Amber
+    600: '#d97706',
+  },
+  
+  error: {
+    50: '#fef2f2',
+    500: '#ef4444',  // Red
+    600: '#dc2626',
+  },
+  
+  // Neutral Grays
+  gray: {
+    50: '#f9fafb',
+    100: '#f3f4f6',
+    200: '#e5e7eb',
+    300: '#d1d5db',
+    400: '#9ca3af',
+    500: '#6b7280',
+    600: '#4b5563',
+    700: '#374151',
+    800: '#1f2937',
+    900: '#111827',
+  },
+};
+```
+
+### Typography System
+
+```typescript
+// Font Configuration
+const typography = {
+  fontFamily: {
+    sans: ['Inter', 'system-ui', 'sans-serif'],
+    display: ['Inter', 'system-ui', 'sans-serif'],
+  },
+  
+  fontSize: {
+    xs: ['0.75rem', { lineHeight: '1rem' }],      // 12px
+    sm: ['0.875rem', { lineHeight: '1.25rem' }],  // 14px
+    base: ['1rem', { lineHeight: '1.5rem' }],     // 16px
+    lg: ['1.125rem', { lineHeight: '1.75rem' }],  // 18px
+    xl: ['1.25rem', { lineHeight: '1.75rem' }],   // 20px
+    '2xl': ['1.5rem', { lineHeight: '2rem' }],    // 24px
+    '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
+    '4xl': ['2.25rem', { lineHeight: '2.5rem' }],   // 36px
+    '5xl': ['3rem', { lineHeight: '1' }],           // 48px
+    '6xl': ['3.75rem', { lineHeight: '1' }],        // 60px
+  },
+  
+  fontWeight: {
+    normal: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '700',
+    extrabold: '800',
+  },
+};
+```
+
+### Spacing System
+
+```typescript
+// 4px base unit spacing scale
+const spacing = {
+  0: '0px',
+  1: '4px',
+  2: '8px',
+  3: '12px',
+  4: '16px',
+  5: '20px',
+  6: '24px',
+  8: '32px',
+  10: '40px',
+  12: '48px',
+  16: '64px',
+  20: '80px',
+  24: '96px',
+  32: '128px',
+};
+```
+
+### Component Design Specifications
+
+#### Button Component
+
+```typescript
+// Button Variants with Tailwind Classes
+const buttonStyles = {
+  // Primary Button
+  primary: `
+    inline-flex items-center justify-center
+    px-6 py-3 rounded-lg
+    bg-primary-600 text-white font-semibold
+    shadow-md hover:shadow-lg
+    hover:bg-primary-700 hover:scale-[1.02]
+    active:scale-[0.98]
+    transition-all duration-200 ease-out
+    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+  `,
+  
+  // Secondary Button
+  secondary: `
+    inline-flex items-center justify-center
+    px-6 py-3 rounded-lg
+    bg-white text-primary-600 font-semibold
+    border-2 border-primary-600
+    hover:bg-primary-50 hover:scale-[1.02]
+    active:scale-[0.98]
+    transition-all duration-200 ease-out
+    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+  `,
+  
+  // Ghost Button
+  ghost: `
+    inline-flex items-center justify-center
+    px-6 py-3 rounded-lg
+    text-gray-700 font-medium
+    hover:bg-gray-100 hover:scale-[1.02]
+    active:scale-[0.98]
+    transition-all duration-200 ease-out
+    focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2
+  `,
+  
+  // Icon Button
+  icon: `
+    inline-flex items-center justify-center
+    w-10 h-10 rounded-full
+    text-gray-600 hover:text-primary-600
+    hover:bg-gray-100 hover:scale-110
+    active:scale-95
+    transition-all duration-200 ease-out
+    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+  `,
+};
+```
+
+#### Card Component
+
+```typescript
+// Product Card Design
+const productCardStyles = `
+  group relative
+  bg-white rounded-xl overflow-hidden
+  shadow-sm hover:shadow-xl
+  transition-all duration-300 ease-out
+  hover:-translate-y-1
+  cursor-pointer
+`;
+
+const productImageStyles = `
+  aspect-square w-full object-cover
+  group-hover:scale-105
+  transition-transform duration-500 ease-out
+`;
+
+const productBadgeStyles = `
+  absolute top-3 right-3
+  px-3 py-1 rounded-full
+  bg-accent-500 text-white text-xs font-semibold
+  shadow-md
+  animate-pulse
+`;
+```
+
+#### Input Component
+
+```typescript
+// Modern Input with Floating Label
+const inputContainerStyles = `
+  relative w-full
+`;
+
+const inputStyles = `
+  peer w-full px-4 py-3 rounded-lg
+  border-2 border-gray-300
+  bg-white text-gray-900
+  placeholder-transparent
+  focus:border-primary-500 focus:ring-4 focus:ring-primary-100
+  transition-all duration-200 ease-out
+  disabled:bg-gray-100 disabled:cursor-not-allowed
+`;
+
+const labelStyles = `
+  absolute left-4 -top-2.5 px-1
+  bg-white text-sm font-medium text-gray-600
+  peer-placeholder-shown:text-base peer-placeholder-shown:top-3
+  peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-primary-600
+  transition-all duration-200 ease-out
+  pointer-events-none
+`;
+
+const errorStyles = `
+  mt-1 text-sm text-error-600
+  animate-shake
+`;
+```
+
+#### Modal/Drawer Component
+
+```typescript
+// Modal Overlay
+const modalOverlayStyles = `
+  fixed inset-0 z-50
+  bg-black/50 backdrop-blur-sm
+  animate-fade-in
+`;
+
+// Modal Content
+const modalContentStyles = `
+  fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+  w-full max-w-lg max-h-[90vh]
+  bg-white rounded-2xl shadow-2xl
+  overflow-hidden
+  animate-scale-in
+`;
+
+// Drawer (Cart)
+const drawerStyles = `
+  fixed top-0 right-0 bottom-0 z-50
+  w-full max-w-md
+  bg-white shadow-2xl
+  overflow-y-auto
+  animate-slide-in-right
+`;
+```
+
+#### Skeleton Loader
+
+```typescript
+// Skeleton with Shimmer Effect
+const skeletonStyles = `
+  relative overflow-hidden
+  bg-gray-200 rounded-lg
+  before:absolute before:inset-0
+  before:-translate-x-full
+  before:animate-shimmer
+  before:bg-gradient-to-r
+  before:from-transparent before:via-white/60 before:to-transparent
+`;
+```
+
+### Animation Specifications
+
+```typescript
+// Tailwind Animation Extensions
+const animations = {
+  // Fade In
+  'fade-in': {
+    '0%': { opacity: '0' },
+    '100%': { opacity: '1' },
+  },
+  
+  // Scale In
+  'scale-in': {
+    '0%': { opacity: '0', transform: 'scale(0.95)' },
+    '100%': { opacity: '1', transform: 'scale(1)' },
+  },
+  
+  // Slide In Right
+  'slide-in-right': {
+    '0%': { transform: 'translateX(100%)' },
+    '100%': { transform: 'translateX(0)' },
+  },
+  
+  // Slide In Up
+  'slide-in-up': {
+    '0%': { opacity: '0', transform: 'translateY(20px)' },
+    '100%': { opacity: '1', transform: 'translateY(0)' },
+  },
+  
+  // Shimmer
+  'shimmer': {
+    '100%': { transform: 'translateX(100%)' },
+  },
+  
+  // Shake (for errors)
+  'shake': {
+    '0%, 100%': { transform: 'translateX(0)' },
+    '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
+    '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
+  },
+  
+  // Bounce (for notifications)
+  'bounce-in': {
+    '0%': { opacity: '0', transform: 'translateY(-20px)' },
+    '50%': { transform: 'translateY(5px)' },
+    '100%': { opacity: '1', transform: 'translateY(0)' },
+  },
+};
+```
+
+### Page Layout Specifications
+
+#### Product Catalog Page
+
+```typescript
+// Hero Section
+const heroStyles = `
+  relative h-[500px] overflow-hidden
+  bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600
+`;
+
+const heroContentStyles = `
+  relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8
+  h-full flex flex-col justify-center items-start
+  text-white
+`;
+
+const heroTitleStyles = `
+  text-5xl md:text-6xl lg:text-7xl font-bold
+  mb-6 animate-slide-in-up
+`;
+
+const heroCTAStyles = `
+  inline-flex items-center gap-2
+  px-8 py-4 rounded-full
+  bg-white text-primary-600 font-bold text-lg
+  shadow-xl hover:shadow-2xl
+  hover:scale-105 active:scale-95
+  transition-all duration-200 ease-out
+`;
+
+// Product Grid
+const productGridStyles = `
+  grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
+  gap-6 lg:gap-8
+  max-w-7xl mx-auto px-4 sm:px-6 lg:px-8
+  py-12
+`;
+```
+
+#### Product Detail Page
+
+```typescript
+// Image Gallery
+const imageGalleryStyles = `
+  grid grid-cols-1 lg:grid-cols-2 gap-8
+  max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12
+`;
+
+const mainImageStyles = `
+  aspect-square rounded-2xl overflow-hidden
+  shadow-lg
+`;
+
+const thumbnailGridStyles = `
+  grid grid-cols-4 gap-4 mt-4
+`;
+
+const thumbnailStyles = `
+  aspect-square rounded-lg overflow-hidden
+  border-2 border-transparent
+  hover:border-primary-500
+  cursor-pointer
+  transition-all duration-200
+`;
+
+// Product Info
+const productInfoStyles = `
+  space-y-6
+`;
+
+const productTitleStyles = `
+  text-4xl font-bold text-gray-900
+`;
+
+const productPriceStyles = `
+  text-3xl font-bold text-primary-600
+`;
+
+const productRatingStyles = `
+  flex items-center gap-2
+`;
+
+const addToCartButtonStyles = `
+  w-full py-4 rounded-xl
+  bg-primary-600 text-white font-bold text-lg
+  shadow-lg hover:shadow-xl
+  hover:bg-primary-700 hover:scale-[1.02]
+  active:scale-[0.98]
+  transition-all duration-200 ease-out
+`;
+```
+
+#### Checkout Page
+
+```typescript
+// Checkout Container
+const checkoutContainerStyles = `
+  max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12
+  grid grid-cols-1 lg:grid-cols-3 gap-8
+`;
+
+// Checkout Form
+const checkoutFormStyles = `
+  lg:col-span-2 space-y-8
+`;
+
+// Step Indicator
+const stepIndicatorStyles = `
+  flex items-center justify-between mb-8
+`;
+
+const stepStyles = `
+  flex items-center gap-3
+`;
+
+const stepNumberStyles = `
+  w-10 h-10 rounded-full
+  flex items-center justify-center
+  font-bold text-lg
+  transition-all duration-300
+`;
+
+const stepNumberActiveStyles = `
+  bg-primary-600 text-white
+  shadow-lg scale-110
+`;
+
+const stepNumberCompleteStyles = `
+  bg-success-500 text-white
+  shadow-md
+`;
+
+const stepNumberInactiveStyles = `
+  bg-gray-200 text-gray-500
+`;
+
+// Order Summary
+const orderSummaryStyles = `
+  lg:col-span-1
+  bg-gray-50 rounded-2xl p-6
+  h-fit sticky top-24
+  shadow-lg
+`;
+```
+
+### Micro-interactions
+
+```typescript
+// Hover Effects
+const hoverEffects = {
+  // Card Lift
+  cardLift: 'hover:-translate-y-1 hover:shadow-xl transition-all duration-300',
+  
+  // Button Press
+  buttonPress: 'hover:scale-[1.02] active:scale-[0.98] transition-transform duration-150',
+  
+  // Image Zoom
+  imageZoom: 'group-hover:scale-105 transition-transform duration-500',
+  
+  // Icon Bounce
+  iconBounce: 'hover:scale-110 hover:rotate-12 transition-all duration-200',
+  
+  // Glow Effect
+  glow: 'hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-shadow duration-300',
+};
+
+// Loading States
+const loadingStates = {
+  // Spinner
+  spinner: 'animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-primary-600',
+  
+  // Pulse
+  pulse: 'animate-pulse bg-gray-200 rounded',
+  
+  // Progress Bar
+  progressBar: 'h-1 bg-primary-600 animate-progress',
+};
+
+// Success Feedback
+const successFeedback = {
+  // Checkmark Animation
+  checkmark: 'animate-scale-in text-success-500',
+  
+  // Success Toast
+  toast: 'animate-bounce-in bg-success-50 border-l-4 border-success-500',
+};
+```
+
+### Responsive Breakpoints
+
+```typescript
+const breakpoints = {
+  sm: '640px',   // Mobile landscape
+  md: '768px',   // Tablet
+  lg: '1024px',  // Desktop
+  xl: '1280px',  // Wide desktop
+  '2xl': '1536px', // Ultra-wide
+};
+
+// Usage Examples
+const responsiveGrid = `
+  grid grid-cols-1
+  sm:grid-cols-2
+  md:grid-cols-3
+  lg:grid-cols-4
+  xl:grid-cols-5
+  gap-4 md:gap-6 lg:gap-8
+`;
+
+const responsivePadding = `
+  px-4 sm:px-6 lg:px-8
+  py-8 sm:py-12 lg:py-16
+`;
+
+const responsiveText = `
+  text-2xl sm:text-3xl md:text-4xl lg:text-5xl
+`;
+```
+
 ## Correctness Properties
 
 *A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
@@ -1413,6 +2365,42 @@ Property 36: Price range filter correctness
 Property 37: Multiple filter AND logic
 *For any* combination of filters applied, returned products should match all applied filters (AND logic)
 **Validates: Requirements 15.3**
+
+Property 38: Design system color consistency
+*For any* component rendered, all colors used should come from the defined design system palette
+**Validates: Requirements 31.1**
+
+Property 39: Typography scale consistency
+*For any* text element, the font size and line height should match the defined typography scale
+**Validates: Requirements 31.2**
+
+Property 40: Spacing system consistency
+*For any* spacing applied (padding, margin, gap), the value should be a multiple of the 4px base unit
+**Validates: Requirements 31.3**
+
+Property 41: Button interaction feedback
+*For any* button interaction (hover, active, focus), appropriate visual feedback should be provided with smooth transitions
+**Validates: Requirements 31.4**
+
+Property 42: Card hover effects
+*For any* product card hovered, the card should lift with shadow elevation and the image should zoom smoothly
+**Validates: Requirements 31.5**
+
+Property 43: Modal animation consistency
+*For any* modal opened, it should animate in with scale and fade effects combined with backdrop blur
+**Validates: Requirements 31.10**
+
+Property 44: Form validation animation
+*For any* form validation error, the error message should animate in with shake effect
+**Validates: Requirements 31.8**
+
+Property 45: Image loading placeholder
+*For any* image loading, a blur-up placeholder should be displayed with smooth fade-in transition
+**Validates: Requirements 31.9**
+
+Property 46: Responsive layout adaptation
+*For any* viewport size change, the layout should adapt smoothly using the defined breakpoints without content overflow
+**Validates: Requirements 31.7**
 
 ## Error Handling
 

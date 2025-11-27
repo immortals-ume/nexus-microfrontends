@@ -12,6 +12,8 @@ This document outlines the requirements for upgrading the existing Nexus microfr
 - **React Query**: A data fetching and caching library for React (also known as TanStack Query)
 - **Axios**: A promise-based HTTP client for making API requests
 - **Tailwind CSS**: A utility-first CSS framework for rapid UI development
+- **Shadcn/ui**: A collection of beautifully designed, accessible components built with Radix UI and Tailwind CSS
+- **Radix UI**: A library of unstyled, accessible component primitives for building high-quality design systems
 - **CDN**: Content Delivery Network for serving static assets with high performance
 - **Shopping Cart**: A temporary storage mechanism for products a user intends to purchase
 - **Product Catalog**: A collection of products available for purchase with details and images
@@ -19,6 +21,18 @@ This document outlines the requirements for upgrading the existing Nexus microfr
 - **Authentication System**: The mechanism for user identity verification and session management
 - **Order Management**: The system for tracking and managing customer orders
 - **Optimistic Update**: A UI pattern that updates the interface immediately before server confirmation
+- **Design System**: A comprehensive set of design standards including colors, typography, spacing, and component patterns
+- **Micro-interaction**: Small, subtle animations that provide feedback for user actions
+- **Skeleton Loader**: A placeholder UI that mimics the structure of content while it loads
+- **Shimmer Effect**: An animated gradient that moves across skeleton loaders to indicate loading
+- **Blur-up**: An image loading technique that shows a blurred placeholder before the full image loads
+- **Backdrop Blur**: A frosted glass effect applied to backgrounds of overlays and modals
+- **Focus Ring**: A visible outline that appears around focused interactive elements for accessibility
+- **Elevation**: The visual depth of an element indicated by shadow intensity
+- **Compound Component**: A component pattern where multiple components work together to form a cohesive UI
+- **Headless Component**: A component that provides logic and behavior without prescribing visual styling
+- **Container Component**: A smart component that handles data fetching and business logic
+- **Presenter Component**: A dumb component that only handles presentation and UI rendering
 
 ## Requirements
 
@@ -124,18 +138,22 @@ This document outlines the requirements for upgrading the existing Nexus microfr
 4. WHEN a customer has no orders THEN the system SHALL display a message indicating no order history exists
 5. WHEN order data is loading THEN the system SHALL display loading indicators for the order list
 
-### Requirement 9: Responsive UI with Tailwind CSS
+### Requirement 9: Modern UI Design System with Tailwind CSS
 
-**User Story:** As a customer, I want a beautiful and responsive interface, so that I can shop comfortably on any device.
+**User Story:** As a customer, I want a beautiful, modern, and responsive interface with smooth animations and delightful interactions, so that I can enjoy a premium shopping experience on any device.
 
 #### Acceptance Criteria
 
-1. WHEN the application renders THEN the system SHALL apply Tailwind CSS utility classes for styling
-2. WHEN the viewport size changes THEN the system SHALL adapt the layout using responsive breakpoints
-3. WHEN interactive elements are hovered THEN the system SHALL provide visual feedback with hover states
-4. WHEN forms are displayed THEN the system SHALL style form inputs consistently with validation states
-5. WHEN the application is viewed on mobile devices THEN the system SHALL display a mobile-optimized navigation menu
-6. WHEN loading states occur THEN the system SHALL display animated skeleton loaders with Tailwind animations
+1. WHEN the application renders THEN the system SHALL apply a modern design system with consistent color palette, typography scale, and spacing system using Tailwind CSS
+2. WHEN the viewport size changes THEN the system SHALL adapt the layout fluidly using responsive breakpoints (mobile: 640px, tablet: 768px, desktop: 1024px, wide: 1280px)
+3. WHEN interactive elements are hovered THEN the system SHALL provide smooth visual feedback with scale transforms, color transitions, and shadow elevations
+4. WHEN forms are displayed THEN the system SHALL style inputs with modern aesthetics including floating labels, focus rings, and smooth validation state transitions
+5. WHEN the application is viewed on mobile devices THEN the system SHALL display a slide-in mobile navigation menu with smooth animations
+6. WHEN loading states occur THEN the system SHALL display elegant skeleton loaders with shimmer animations
+7. WHEN users interact with buttons THEN the system SHALL provide haptic-like feedback with scale and shadow animations
+8. WHEN cards and containers are displayed THEN the system SHALL use subtle shadows, rounded corners, and hover lift effects
+9. WHEN images load THEN the system SHALL display blur-up placeholders with smooth fade-in transitions
+10. WHEN modals and drawers appear THEN the system SHALL animate in with smooth slide and fade transitions with backdrop blur
 
 ### Requirement 10: Performance Optimization with CDN
 
@@ -389,3 +407,25 @@ This document outlines the requirements for upgrading the existing Nexus microfr
 3. WHEN viewing product performance THEN the system SHALL show top-selling and low-performing products
 4. WHEN viewing customer analytics THEN the system SHALL show new vs returning customers and lifetime value
 5. WHEN exporting reports THEN the system SHALL generate downloadable CSV or PDF files
+
+### Requirement 31: Premium UI/UX Design System
+
+**User Story:** As a customer, I want a visually stunning and delightful shopping experience with smooth animations and modern design, so that I feel confident and excited while shopping.
+
+#### Acceptance Criteria
+
+1. WHEN the application loads THEN the system SHALL display a cohesive design system with a modern color palette (primary: indigo-600, secondary: purple-600, accent: pink-500, success: emerald-500, warning: amber-500, error: red-500)
+2. WHEN typography is rendered THEN the system SHALL use a consistent type scale with Inter font family for body text and display headings with appropriate font weights (regular: 400, medium: 500, semibold: 600, bold: 700)
+3. WHEN spacing is applied THEN the system SHALL use a consistent 4px base unit spacing scale (4, 8, 12, 16, 24, 32, 48, 64, 96px)
+4. WHEN buttons are displayed THEN the system SHALL render with rounded corners (8px), appropriate padding, and smooth hover transitions with scale (1.02) and shadow elevation
+5. WHEN product cards are shown THEN the system SHALL display with subtle shadows, hover lift effects (translateY -4px), and smooth image zoom on hover
+6. WHEN the hero section loads THEN the system SHALL display with gradient backgrounds, large typography, and animated call-to-action buttons
+7. WHEN navigation occurs THEN the system SHALL provide smooth page transitions with fade effects
+8. WHEN forms are interacted with THEN the system SHALL show floating labels, smooth focus states with ring colors, and animated validation feedback
+9. WHEN images are loading THEN the system SHALL display progressive blur-up placeholders with smooth opacity transitions
+10. WHEN modals open THEN the system SHALL animate with smooth scale and fade transitions combined with backdrop blur effects
+11. WHEN toast notifications appear THEN the system SHALL slide in from the top-right with bounce effect and auto-dismiss after 5 seconds
+12. WHEN the cart drawer opens THEN the system SHALL slide in from the right with smooth animation and backdrop overlay
+13. WHEN product filters are applied THEN the system SHALL animate filter chips with scale and fade effects
+14. WHEN search results appear THEN the system SHALL stagger-animate each result card for visual interest
+15. WHEN checkout steps progress THEN the system SHALL animate step indicators with smooth transitions and checkmark reveals

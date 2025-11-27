@@ -239,7 +239,7 @@
                   entryGlobalName: "dashboard",
                   name: "dashboard",
                   type: "module",
-                  entry: "http://localhost:5175/remoteEntry.js",
+                  entry: "http://localhost:5180/remoteEntry.js",
                   shareScope: "default",
                 }
           ,
@@ -247,7 +247,7 @@
                   entryGlobalName: "admin",
                   name: "admin",
                   type: "module",
-                  entry: "http://localhost:5176/remoteEntry.js",
+                  entry: "http://localhost:5179/remoteEntry.js",
                   shareScope: "default",
                 }
           ,
@@ -255,7 +255,7 @@
                   entryGlobalName: "analytics",
                   name: "analytics",
                   type: "module",
-                  entry: "http://localhost:5177/remoteEntry.js",
+                  entry: "http://localhost:5181/remoteEntry.js",
                   shareScope: "default",
                 }
           ,
