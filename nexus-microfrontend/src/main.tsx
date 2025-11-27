@@ -1,3 +1,4 @@
+import "@module-federation/runtime";
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -7,6 +8,7 @@ import { QueryProvider } from './lib/react-query/QueryProvider'
 import { AuthProvider, ThemeProvider } from './providers'
 import { useStore } from './store'
 import { ApiServiceFactory } from './services/ApiServiceFactory'
+
 
 /**
  * Application Entry Point

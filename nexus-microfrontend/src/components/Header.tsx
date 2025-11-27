@@ -11,8 +11,10 @@ import { useState } from 'react';
  * - Cart icon with item count badge
  * - User menu with login/logout
  * - Theme toggle
+ * - Mobile menu button
  * 
  * Integrates with Zustand store for cart count and auth state.
+ * Responsive design with mobile menu for small screens.
  */
 export function Header() {
   const location = useLocation();
@@ -22,7 +24,7 @@ export function Header() {
   // Get state from Zustand store
   const { itemCount } = useStore((state) => state.cart);
   const { isAuthenticated, user } = useStore((state) => state.auth);
-  const { theme, setTheme } = useStore((state) => state.ui);
+  const { theme, setTheme, toggleMobileMenu } = useStore((state) => state.ui);
   const toggleCart = useStore((state) => state.ui.toggleCart);
   const logout = useStore((state) => state.auth.logout);
 
@@ -60,10 +62,13 @@ export function Header() {
           </Link>
         </div>
 
-        {/* Main Navigation */}
-        <nav className="nav">
+        {/* Main Navigation - Hidden on mobile */}
+        <nav className="nav hidden lg:flex">
           <Link to="/" className={isActive('/') ? 'nav-link active' : 'nav-link'}>
             Home
+          </Link>
+          <Link to="/products" className={isActive('/products') ? 'nav-link active' : 'nav-link'}>
+            Products
           </Link>
           <Link to="/dashboard" className={isActive('/dashboard') ? 'nav-link active' : 'nav-link'}>
             Shop
@@ -80,8 +85,8 @@ export function Header() {
           )}
         </nav>
 
-        {/* Search Bar */}
-        <form className="search-bar" onSubmit={handleSearch}>
+        {/* Search Bar - Hidden on small mobile */}
+        <form className="search-bar hidden sm:flex" onSubmit={handleSearch}>
           <input
             type="search"
             placeholder="Search products..."
@@ -97,10 +102,10 @@ export function Header() {
 
         {/* Right Side Actions */}
         <div className="header-actions">
-          {/* Theme Toggle */}
+          {/* Theme Toggle - Hidden on mobile */}
           <button
             onClick={toggleTheme}
-            className="icon-button"
+            className="icon-button hidden md:flex"
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
@@ -122,8 +127,8 @@ export function Header() {
             )}
           </button>
 
-          {/* User Menu */}
-          <div className="user-menu-container">
+          {/* User Menu - Hidden on mobile */}
+          <div className="user-menu-container hidden lg:block">
             {isAuthenticated ? (
               <>
                 <button
@@ -174,6 +179,28 @@ export function Header() {
               </Link>
             )}
           </div>
+
+          {/* Mobile Menu Button - Visible only on mobile */}
+          <button
+            onClick={toggleMobileMenu}
+            className="icon-button lg:hidden"
+            aria-label="Open mobile menu"
+            title="Menu"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </header>

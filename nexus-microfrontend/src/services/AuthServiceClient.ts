@@ -1,4 +1,5 @@
-import axios, { type AxiosInstance, AxiosError } from 'axios';
+import axios, { type AxiosInstance } from 'axios';
+import { setupResponseInterceptor, setupRetryInterceptor } from './axiosInterceptors';
 import type { LoginCredentials, RegisterData, AuthResponse } from './types';
 
 /**
@@ -18,42 +19,9 @@ export class AuthServiceClient {
       },
     });
 
-    this.setupInterceptors();
-  }
-
-  /**
-   * Set up response interceptors
-   * Note: No request interceptor for auth tokens since this service is used to obtain them
-   */
-  private setupInterceptors(): void {
-    // Response interceptor: Handle errors
-    this.client.interceptors.response.use(
-      (response) => response,
-      (error: AxiosError) => this.handleError(error)
-    );
-  }
-
-  /**
-   * Handle API errors
-   */
-  private handleError(error: AxiosError): Promise<never> {
-    if (error.response?.status === 401) {
-      console.error('Invalid credentials');
-    } else if (error.response?.status === 403) {
-      console.error('Forbidden - insufficient permissions');
-    } else if (error.response?.status === 404) {
-      console.error('Resource not found');
-    } else if (error.response?.status === 422) {
-      console.error('Validation error:', error.response.data);
-    } else if (error.response?.status && error.response.status >= 500) {
-      console.error('Server error:', error.message);
-    } else if (error.code === 'ECONNABORTED') {
-      console.error('Request timeout');
-    } else if (!error.response) {
-      console.error('Network error - please check your connection');
-    }
-
-    return Promise.reject(error);
+    // Setup response interceptor only (no auth token needed for auth service)
+    setupResponseInterceptor(this.client, 'AuthService');
+    setupRetryInterceptor(this.client, 2, 1000); // Fewer retries for auth operations
   }
 
   /**

@@ -1,4 +1,5 @@
-import axios, { type AxiosInstance, AxiosError } from 'axios';
+import axios, { type AxiosInstance } from 'axios';
+import { setupInterceptors, setupRetryInterceptor } from './axiosInterceptors';
 import type {
   Product,
   ProductFilters,
@@ -23,66 +24,9 @@ export class ProductServiceClient {
       },
     });
 
-    this.setupInterceptors();
-  }
-
-  /**
-   * Set up request and response interceptors
-   */
-  private setupInterceptors(): void {
-    // Request interceptor: Add auth token
-    this.client.interceptors.request.use(
-      (config) => {
-        // Get token from localStorage (persisted by Zustand)
-        const storedState = localStorage.getItem('nexus-ecommerce-store');
-        if (storedState) {
-          try {
-            const state = JSON.parse(storedState);
-            const token = state?.state?.auth?.token;
-            if (token) {
-              config.headers.Authorization = `Bearer ${token}`;
-            }
-          } catch (error) {
-            console.error('Failed to parse stored state:', error);
-          }
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
-    );
-
-    // Response interceptor: Handle errors
-    this.client.interceptors.response.use(
-      (response) => response,
-      (error: AxiosError) => this.handleError(error)
-    );
-  }
-
-  /**
-   * Handle API errors
-   */
-  private handleError(error: AxiosError): Promise<never> {
-    if (error.response?.status === 401) {
-      // Unauthorized - redirect to login
-      console.error('Unauthorized access - redirecting to login');
-      window.location.href = '/login';
-    } else if (error.response?.status === 403) {
-      console.error('Forbidden - insufficient permissions');
-    } else if (error.response?.status === 404) {
-      console.error('Resource not found');
-    } else if (error.response?.status === 422) {
-      console.error('Validation error:', error.response.data);
-    } else if (error.response?.status && error.response.status >= 500) {
-      console.error('Server error:', error.message);
-    } else if (error.code === 'ECONNABORTED') {
-      console.error('Request timeout');
-    } else if (!error.response) {
-      console.error('Network error - please check your connection');
-    }
-
-    return Promise.reject(error);
+    // Setup centralized interceptors
+    setupInterceptors(this.client, 'ProductService');
+    setupRetryInterceptor(this.client, 3, 1000);
   }
 
   /**

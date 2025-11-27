@@ -16,15 +16,19 @@
   "dependencies": {
     "@tanstack/react-query": "^5.90.10",
     "axios": "^1.13.2",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.24",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.9.6",
+    "tailwind-merge": "^3.4.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@module-federation/vite": "^1.9.1",
-    "@originjs/vite-plugin-federation": "^1.4.1",
+    "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",

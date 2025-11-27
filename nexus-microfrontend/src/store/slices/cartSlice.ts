@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { AppStore, CartSlice, Product, CartItem } from '../types';
+import { eventBus } from '../../utils/eventBus';
 
 // Helper function to generate unique IDs
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -83,7 +84,9 @@ export const createCartSlice: StateCreator<
       itemCount: cart.itemCount,
     }));
 
-    // Event bus emission will be added when event bus is integrated
+    // Emit events
+    eventBus.publish('cart:item-added', { productId: product.id, quantity });
+    eventBus.publish('cart:updated', { itemCount: cart.itemCount, total: cart.total });
   },
 
   removeItem: (productId: string) => {
@@ -114,7 +117,9 @@ export const createCartSlice: StateCreator<
       itemCount: cart.itemCount,
     }));
 
-    // Event bus emission will be added when event bus is integrated
+    // Emit events
+    eventBus.publish('cart:item-removed', { productId });
+    eventBus.publish('cart:updated', { itemCount: cart.itemCount, total: cart.total });
   },
 
   updateQuantity: (productId: string, quantity: number) => {
@@ -156,7 +161,8 @@ export const createCartSlice: StateCreator<
       itemCount: cart.itemCount,
     }));
 
-    // Event bus emission will be added when event bus is integrated
+    // Emit events
+    eventBus.publish('cart:updated', { itemCount: cart.itemCount, total: cart.total });
   },
 
   clearCart: () => {
@@ -175,7 +181,9 @@ export const createCartSlice: StateCreator<
     // Clear from localStorage
     localStorage.removeItem('cart');
 
-    // Event bus emission will be added when event bus is integrated
+    // Emit events
+    eventBus.publish('cart:cleared', {});
+    eventBus.publish('cart:updated', { itemCount: 0, total: 0 });
   },
 
   setLoading: (isLoading: boolean) => {

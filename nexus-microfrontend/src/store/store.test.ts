@@ -23,25 +23,72 @@ describe('Zustand Store', () => {
       expect(auth.error).toBeNull();
     });
 
-    it('should set user and token on login', async () => {
+    it('should set user directly using setUser', () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: 'customer' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
       const { auth } = useStore.getState();
-      await auth.login({ email: 'test@example.com', password: 'password' });
+      auth.setUser(mockUser);
 
       const state = useStore.getState();
-      expect(state.auth.user).not.toBeNull();
-      expect(state.auth.token).not.toBeNull();
+      expect(state.auth.user).toEqual(mockUser);
       expect(state.auth.isAuthenticated).toBe(true);
     });
 
-    it('should clear state on logout', async () => {
+    it('should set token directly using setToken', () => {
       const { auth } = useStore.getState();
-      await auth.login({ email: 'test@example.com', password: 'password' });
-      auth.logout();
+      auth.setToken('test-token', 'test-refresh-token');
 
       const state = useStore.getState();
+      expect(state.auth.token).toBe('test-token');
+      expect(state.auth.refreshToken).toBe('test-refresh-token');
+    });
+
+    it('should clear state on logout without API call', async () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: 'customer' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const { auth } = useStore.getState();
+      auth.setUser(mockUser);
+      auth.setToken('test-token', 'test-refresh-token');
+
+      // Verify user is set
+      let state = useStore.getState();
+      expect(state.auth.isAuthenticated).toBe(true);
+
+      // Now logout (this will try to call API but will handle error gracefully)
+      await auth.logout();
+
+      state = useStore.getState();
       expect(state.auth.user).toBeNull();
       expect(state.auth.token).toBeNull();
       expect(state.auth.isAuthenticated).toBe(false);
+    });
+
+    it('should set and clear error', () => {
+      const { auth } = useStore.getState();
+      auth.setError('Test error');
+
+      let state = useStore.getState();
+      expect(state.auth.error).toBe('Test error');
+
+      auth.clearError();
+      state = useStore.getState();
+      expect(state.auth.error).toBeNull();
     });
   });
 

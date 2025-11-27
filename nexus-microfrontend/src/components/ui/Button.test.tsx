@@ -36,10 +36,10 @@ describe('Button Component', () => {
   it('handles click events', async () => {
     const handleClick = vi.fn()
     const user = userEvent.setup()
-    
+
     render(<Button onClick={handleClick}>Click me</Button>)
     const button = screen.getByRole('button')
-    
+
     await user.click(button)
     expect(handleClick).toHaveBeenCalledTimes(1)
   })
@@ -64,10 +64,10 @@ describe('Button Component', () => {
   it('applies different sizes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>)
     expect(screen.getByRole('button')).toHaveClass('px-3')
-    
+
     rerender(<Button size="md">Medium</Button>)
     expect(screen.getByRole('button')).toHaveClass('px-4')
-    
+
     rerender(<Button size="lg">Large</Button>)
     expect(screen.getByRole('button')).toHaveClass('px-6')
   })
