@@ -1,7 +1,6 @@
 # Nexus E-Commerce Microfrontend Platform
 
-A FAANG-level e-commerce application built with React, TypeScript, and Module Federation. Features modern state management, responsive design, and a scalable microfrontend architecture.
-
+A e-commerce application built with React, TypeScript, and Module Federation. Features modern state management, responsive design, and a scalable microfrontend architecture.
 ## 🚀 Features
 
 - **Microfrontend Architecture** - Independent, deployable modules using Module Federation
@@ -343,5 +342,3 @@ This project is licensed under the MIT License.
 Built with ❤️ by the Nexus team
 
 ---
-
-**Note**: This is a demonstration project showcasing modern microfrontend architecture and best practices.
